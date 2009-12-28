@@ -12,8 +12,8 @@
  * visit the project website http://www.typolight.org.
  * 
  * PHP version 5
- * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009 by CyberSpectrum 
- * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009-2010 by CyberSpectrum 
+ * @author		Peter Koch, Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package		Tenside
  * @license		LGPL 
  * @filesource
@@ -23,7 +23,7 @@
  * Class TensideCatalog
  *
  * TYPOlight Repository :: nusoap based Base backend module
- * @copyright	CyberSpectrum 2009
+ * @copyright	CyberSpectrum 2009,2010
  * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package		Controller
  *

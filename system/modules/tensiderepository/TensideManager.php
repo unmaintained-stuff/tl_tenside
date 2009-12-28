@@ -1,11 +1,22 @@
 <?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+
 /**
- * TYPOlight Repository :: Backend module for extension management
+ * TYPOlight webCMS
  *
- * NOTE: this file was edited with tabs set to 4.
- * @package Repository
- * @copyright Copyright (C) 2008 by Peter Koch, IBK Software AG
- * @license See accompaning file LICENSE.txt
+ * The TYPOlight webCMS is an accessible web content management system that 
+ * specializes in accessibility and generates W3C-compliant HTML code. It 
+ * provides a wide range of functionality to develop professional websites 
+ * including a built-in search engine, form generator, file and user manager, 
+ * CSS engine, multi-language support and many more. For more information and 
+ * additional TYPOlight applications like the TYPOlight MVC Framework please 
+ * visit the project website http://www.typolight.org.
+ * 
+ * PHP version 5
+ * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009-2010 by CyberSpectrum 
+ * @author		Peter Koch, Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @package		Tenside
+ * @license		LGPL 
+ * @filesource
  */
 
 /**
@@ -26,7 +37,8 @@ class TensideManager extends Tenside
 			array('edit',			'repository_mgredit',		'edit'		),
 			array('install',		'repository_mgrinst',		'install'	),
 			array('update',			'repository_mgrupdt',		'update'	),
-			array('uninstall',		'repository_mgruist',		'uninstall'	)
+			array('uninstall',		'repository_mgruist',		'uninstall'	),
+			array('export',			'tensiderep_mgrexp',		'export'	)
 		);
 		return parent::generate();
 	} // generate
@@ -156,7 +168,26 @@ class TensideManager extends Tenside
 		
 		$rep->installLink = $this->createUrl(array('install'=>'extension'));
 		$rep->updateLink = $this->createUrl(array('update'=>'database'));
+		$rep->exportLink = $this->createUrl(array('export'=>'all'));
 	} // listinsts
+
+	/**
+	 * Export the list of the installed extensions
+	 */
+	protected function export()
+	{
+		$rep = &$this->Template->rep;
+		// query extensions
+		$rep->extensions = array();
+		$e = (object)array('extension' => 'TYPOlight', 'version' => VERSION, 'build' => BUILD);
+		$rep->extensions[] = $e;
+		$ext = $this->Database->execute("select * from `tl_repository_installs` order by `extension`");
+		while ($ext->next()) {
+			$e = (object)$ext->row();
+			$e->version = Repository::formatVersion($e->version);
+			$rep->extensions[] = $e;
+		} // while
+	} // export
 
 	/**
 	 * Edit extension settings
@@ -418,8 +449,27 @@ class TensideManager extends Tenside
 			$this->import('String');
 			$sql = deserialize($this->Input->post('sql'));
 			if (is_array($sql))
-				foreach ($sql as $command)
-					$this->Database->execute($this->String->decodeEntities($command));
+			{
+				// from 2.8 on upwards, we have the sql commands in the session for enhanced security but
+				// we have to maintain compatibility with prior versions for at least some more time. :)
+				if(version_compare('2.8', VERSION, '<'))
+				{
+					foreach ($sql as $command)
+					{
+						$this->Database->execute($this->String->decodeEntities($command));
+					}
+				} else {
+					// we are at least 2.8 and therefore can proceed fetching the stuff from the session.
+					foreach ($sql as $key)
+					{
+						if (isset($_SESSION['sql_commands'][$key]))
+						{
+							$this->Database->query(str_replace('DEFAULT CHARSET=utf8;', 'DEFAULT CHARSET=utf8 COLLATE ' . $GLOBALS['TL_CONFIG']['dbCollation'] . ';', $_SESSION['sql_commands'][$key]));
+						}
+					}
+					$_SESSION['sql_commands'] = array();
+				}
+			}
 		} // if
 		$this->import('DatabaseInstaller');
 		$rep->dbUpdate = $this->DatabaseInstaller->makeSqlForm();
@@ -499,7 +549,7 @@ class TensideManager extends Tenside
 		} // switch
 
 	} // uninstall
-	
+
 	/**
 	 * Update the files of an extension.
 	 * @param string $aName Name of the extension to install/update.
@@ -627,6 +677,7 @@ class TensideManager extends Tenside
 			if ($sum_ok>0) $rep->log .= '<div>'.sprintf($text['filesunchanged'],$sum_ok)."</div>\n";	
 			if ($sum_del>0) $rep->log .= '<div>'.sprintf($text['filesdeleted'],$sum_del)."</div>\n";	
 			$rep->log .= '<div class="color_green">'.$text['actionsuccess']."</div>\n";
+			$this->log('Extension "'. $aName .'" has been updated to version "'. Repository::formatVersion($aVersion) .'"', 'RepositoryManager::updateExtension()', TL_REPOSITORY);
 		} // try
 		catch (Exception $exc) {
 			$rep->log .= 
@@ -762,6 +813,7 @@ class TensideManager extends Tenside
 				$this->Files->delete($zipname);
 				throw $exc;
 			} // catch
+			$this->log('Extension "'. $aName .'" version "'. Repository::formatVersion($aVersion) .'" has been installed', 'RepositoryManager::installExtension()', TL_REPOSITORY);
 		} // try
 		catch (Exception $exc) {
 			$rep->log .= 
@@ -851,6 +903,7 @@ class TensideManager extends Tenside
 				$db->prepare("delete from `tl_repository_installs` where `id`=?")->execute($instId);
 				$rep->log .= '<div class="color_green">'.$text['actionsuccess'].'</div>';
 			} // if
+			$this->log('Extension "'. $aName .'" has been uninstalled', 'RepositoryManager::uninstallExtension()', TL_REPOSITORY);
 		} // try
 		catch (Exception $exc) {
 			$rep->log .= 

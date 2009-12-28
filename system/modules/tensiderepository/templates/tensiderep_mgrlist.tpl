@@ -17,6 +17,7 @@
 ?>
 
 <div id="tl_buttons" class="buttonwrapper">
+<?php echo $theme->createMainButton('info16', $rep->exportLink, $text['exportlist']); ?> &nbsp; :: &nbsp; 
 <?php echo $theme->createMainButton('dbcheck16', $rep->updateLink, $text['updatedatabase']); ?> &nbsp; :: &nbsp; 
 <?php echo $theme->createMainButton('install16', $rep->installLink, $text['installextension']); ?> 
 </div>

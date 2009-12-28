@@ -18,5 +18,6 @@
  * @filesource
  */
 
-$GLOBALS['TL_LANG']['tl_settings']['repository_force_nusoap'] = array('NuSOAP Technologie erzwingen', 'Wählen Sie dies um den Einsatz der nusoap Bibliothek auch dann zu erzwingen, wenn das PHP SOAP Modul geladen ist. Diese Option steht nicht zur Auswahl, wenn das PHP Modul nicht geladen ist.');
+$GLOBALS['TL_LANG']['tl_repository']['exportlist']         = 'Export list';
+
 ?>
