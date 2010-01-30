@@ -446,7 +446,6 @@ class TensideManager extends Tenside
 		// return from submit?
 		if ($this->filterPost('repository_action') == $rep->f_action) {
 			if (isset($_POST['repository_cancelbutton'])) $this->redirect($rep->homeLink);
-			$this->import('String');
 			$sql = deserialize($this->Input->post('sql'));
 			if (is_array($sql))
 			{
@@ -454,6 +453,7 @@ class TensideManager extends Tenside
 				// we have to maintain compatibility with prior versions for at least some more time. :)
 				if(version_compare('2.8', VERSION, '<'))
 				{
+					$this->import('String');
 					foreach ($sql as $command)
 					{
 						$this->Database->execute($this->String->decodeEntities($command));

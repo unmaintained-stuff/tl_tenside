@@ -87,15 +87,4 @@ if(!class_exists('SoapClient'))
 	class SoapClient extends NuSoapClient {}
 }
 
-// provide wrapper object to "simulate" soap extension
-if(!class_exists('SoapFault'))
-{
-	class SoapFault extends Exception {
-		public function __construct($faultcode, $faultstring/*, $faultactor, $detail, $faultname, $headerfault */)
-		{
-			parent::__construct($faultstring);
-		}
-	}
-}
-
 ?>

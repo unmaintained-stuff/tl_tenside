@@ -18,5 +18,28 @@
  * @filesource
  */
 
-$GLOBALS['TL_LANG']['tl_settings']['repository_force_nusoap'] = array('NuSOAP Technologie erzwingen', 'Wählen Sie dies um den Einsatz der nusoap Bibliothek auch dann zu erzwingen, wenn das PHP SOAP Modul geladen ist. Diese Option steht nicht zur Auswahl, wenn das PHP Modul nicht geladen ist.');
+
+/**
+ * Class SoapFault
+ *
+ * @copyright	CyberSpectrum 2009
+ * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @package		Controller
+ *
+ */
+
+// require nusoap.
+require_once(TL_ROOT . '/plugins/nusoap/nusoap.php');
+
+// provide wrapper object to "simulate" soap fault
+if(!class_exists('SoapFault'))
+{
+	class SoapFault extends Exception {
+		public function __construct($faultcode, $faultstring/*, $faultactor, $detail, $faultname, $headerfault */)
+		{
+			parent::__construct($faultstring);
+		}
+	}
+}
+
 ?>
