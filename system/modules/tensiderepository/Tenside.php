@@ -1,21 +1,30 @@
 <?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
- * TYPOlight webCMS
+ * Contao Open Source CMS
+ * Copyright (C) 2005-2010 Leo Feyer
  *
- * The TYPOlight webCMS is an accessible web content management system that 
- * specializes in accessibility and generates W3C-compliant HTML code. It 
- * provides a wide range of functionality to develop professional websites 
- * including a built-in search engine, form generator, file and user manager, 
- * CSS engine, multi-language support and many more. For more information and 
- * additional TYPOlight applications like the TYPOlight MVC Framework please 
- * visit the project website http://www.typolight.org.
+ * Formerly known as TYPOlight Open Source CMS.
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
  * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program. If not, please visit the Free
+ * Software Foundation website at <http://www.gnu.org/licenses/>.
+ *
  * PHP version 5
- * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009-2010 by CyberSpectrum 
- * @author		Peter Koch, Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @package		Tenside
- * @license		LGPL 
+ * @copyright  Leo Feyer 2005-2010
+ * @author     Leo Feyer <http://www.contao.org>
+ * @package    Repository
+ * @license    LGPL
  * @filesource
  */
 
@@ -56,8 +65,8 @@ class Tenside extends RepositoryBackendModule
 					break;
 				} // if
 			} // if
-		} // foreach			
-		return str_replace('{{', '{&lrm;{', BackendModule::generate());
+		} // foreach
+		return str_replace(array('{{', '}}'), array('[{]', '[}]'), BackendModule::generate());
 	} // generate
 
 	/**
@@ -68,7 +77,7 @@ class Tenside extends RepositoryBackendModule
 		// hide module?
 		$compiler = $this->compiler;
 		if ($compiler=='hide') return;
-		
+
 		// load other helpers
 		$this->tl_root = str_replace("\\",'/',TL_ROOT).'/';
 		$this->tl_files = str_replace("\\",'/',$GLOBALS['TL_CONFIG']['uploadPath']).'/';
@@ -77,7 +86,7 @@ class Tenside extends RepositoryBackendModule
 		$this->Template->rep = $this->rep;
 		$this->languages = rtrim($GLOBALS['TL_LANGUAGE'].','.trim($GLOBALS['TL_CONFIG']['repository_languages']),',');
 		$this->languages = implode(',',array_unique(explode(',',$this->languages)));
-		
+
 		// complete rep initialization
 		$rep = $this->rep;
 		$rep->f_link	= $this->createUrl(array($this->action=>$this->parameter));
@@ -86,7 +95,7 @@ class Tenside extends RepositoryBackendModule
 		$rep->theme		= new RepositoryBackendTheme();
 		$rep->backLink	= $this->getReferer(ENCODE_AMPERSANDS);
 		$rep->homeLink	= $this->createUrl();
-		
+
 		// load soap client in case wsdl file is defined
 		$wsdl = trim($GLOBALS['TL_CONFIG']['repository_wsdl']);
 		if ($wsdl != '') {
@@ -125,9 +134,9 @@ class Tenside extends RepositoryBackendModule
 				$this->Template->error = 'FATAL ERROR IN SOAP STARTUP: ' . $e->getMessage();
 				return;
 			}
-				$this->mode = 'soap';
+			$this->mode = 'soap';
 		} else
-			// fallback toload RepositoryServer class if on central server
+			// fallback to load RepositoryServer class if on central server
 			if (file_exists($this->tl_root . 'system/modules/rep_server/RepositoryServer.php')) {
 				$this->import('RepositoryServer');
 				$this->RepositoryServer->enableLocal();

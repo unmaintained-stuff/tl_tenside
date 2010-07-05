@@ -1,30 +1,40 @@
 <?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
- * TYPOlight webCMS
+ * Contao Open Source CMS
+ * Copyright (C) 2005-2010 Leo Feyer
  *
- * The TYPOlight webCMS is an accessible web content management system that 
- * specializes in accessibility and generates W3C-compliant HTML code. It 
- * provides a wide range of functionality to develop professional websites 
- * including a built-in search engine, form generator, file and user manager, 
- * CSS engine, multi-language support and many more. For more information and 
- * additional TYPOlight applications like the TYPOlight MVC Framework please 
- * visit the project website http://www.typolight.org.
+ * Formerly known as TYPOlight Open Source CMS.
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
  * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program. If not, please visit the Free
+ * Software Foundation website at <http://www.gnu.org/licenses/>.
+ *
  * PHP version 5
- * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009-2010 by CyberSpectrum 
- * @author		Peter Koch, Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @package		Tenside
- * @license		LGPL 
+ * @copyright  Leo Feyer 2005-2010
+ * @author     Leo Feyer <http://www.contao.org>
+ * @package    Repository
+ * @license    LGPL
  * @filesource
  */
+
 
 /**
  * Class TensideCatalog
  *
- * TYPOlight Repository :: nusoap based Base backend module
- * @copyright	CyberSpectrum 2009,2010
- * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * Contao Repository :: nusoap based Base backend module
+ * @copyright	Peter Koch 2008-2010, CyberSpectrum 2009-2010
+ * @author		Peter Koch IBK Software AG, Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @package		Controller
  *
  */
@@ -42,7 +52,6 @@ class TensideCatalog extends Tenside
 			array('',				'tensiderep_catlist',		'listExtensions' ),
 			array('view',			'repository_catview',		'viewExtension' )
 		);
-		//return parent::generate();
 		return Tenside::generate();
 	} // generate
 	
@@ -84,34 +93,38 @@ class TensideCatalog extends Tenside
 			$rep->f_state	= trim($this->Input->post('repository_state'));
 			$rep->f_author	= trim($this->Input->post('repository_author'));
 			$rep->f_order	= trim($this->Input->post('repository_order'));
+			$rep->f_page	= trim($this->Input->post('repository_page'));
+			$rep->f_find	= trim($this->Input->post('repository_find'));
 			$this->Session->set(
 				'repository_catalog_settings',
 				array(
+					'repository_tag'	=> $rep->f_tag,
+					'repository_type'	=> $rep->f_type,
+					'repository_category'=> $rep->f_category,
+					'repository_state'	=> $rep->f_state,
+					'repository_author'	=> $rep->f_author,
+					'repository_order'	=> $rep->f_order,
+					'repository_page'	=> $rep->f_page,
+					'repository_find'	=> $rep->f_find,
 					'repository_wildcardsearch'		=> $rep->f_wildcardsearch,
-					'repository_tag'				=> $rep->f_tag,
-					'repository_type'				=> $rep->f_type,
-					'repository_category'			=> $rep->f_category,
-					'repository_state'				=> $rep->f_state,
-					'repository_author'				=> $rep->f_author,
-					'repository_order'				=> $rep->f_order,
-					'repository_page'				=> $rep->f_page
 				)
 			);
 		} else {
 			$stg = $this->Session->get('repository_catalog_settings');
 			if (is_array($stg)) {
+				$rep->f_tag 	= trim($stg['repository_tag']);
+				$rep->f_type 	= trim($stg['repository_type']);
+				$rep->f_category= trim($stg['repository_category']);
+				$rep->f_state	= trim($stg['repository_state']);
+				$rep->f_author	= trim($stg['repository_author']);
+				$rep->f_order	= trim($stg['repository_order']);
+				$rep->f_page	= trim($stg['repository_page']);
+				$rep->f_find	= trim($stg['repository_find']);
 				$rep->f_wildcardsearch	= trim($stg['repository_wildcardsearch']);
-				$rep->f_tag 			= trim($stg['repository_tag']);
-				$rep->f_type 			= trim($stg['repository_type']);
-				$rep->f_category		= trim($stg['repository_category']);
-				$rep->f_state			= trim($stg['repository_state']);
-				$rep->f_author			= trim($stg['repository_author']);
-				$rep->f_order			= trim($stg['repository_order']);
-				$rep->f_page			= trim($stg['repository_page']);
 			} // if
 		} // if	
 		
-		if ($rep->f_order=='') $rep->f_order = 'reldate';
+		if ($rep->f_order=='') $rep->f_order = 'popular';
 		
 		if ($rep->f_page < 1) $rep->f_page = 1;
 		$perpage = (int)trim($GLOBALS['TL_CONFIG']['repository_listsize']);
@@ -124,24 +137,25 @@ class TensideCatalog extends Tenside
 			'first'		=> ($rep->f_page-1) * $perpage,
 			'limit'		=> $perpage
 		);
-		if ($rep->f_tag					!= '')	$options[tags]				= $rep->f_tag;
-		if ($rep->f_type 				!= '')	$options[types]				= $rep->f_type;
-		if ($rep->f_category			!= '')	$options[categories] 		= $rep->f_category;
-		if ($rep->f_state				!= '')	$options[states]			= $rep->f_state; 
-		if ($rep->f_author				!= '')	$options[authors]			= $rep->f_author;
-		if ($rep->f_wildcardsearch		!= '')	{
-												unset($options[match]);// in future(ER 2.0) we want something like: $options[match]				= 'fuzzy';
-												$options[tags]				= $rep->f_wildcardsearch;
-												unset($rep->f_tag);
-												}
+		if ($rep->f_tag		!= '') $options['tags']			= $rep->f_tag;
+		if ($rep->f_type 	!= '') $options['types']		= $rep->f_type;
+		if ($rep->f_category!= '') $options['categories'] 	= $rep->f_category;
+		if ($rep->f_state	!= '') $options['states']		= $rep->f_state; 
+		if ($rep->f_author	!= '') $options['authors']		= $rep->f_author;
+		if ($rep->f_find	!= '') $options['find']			= $rep->f_find;
+		if ($rep->f_wildcardsearch != '')
+		{
+			unset($options[match]);// in future(ER 2.0) we want something like: $options[match]				= 'fuzzy';
+			$options[tags]				= $rep->f_wildcardsearch;
+			unset($rep->f_tag);
+		}
 		switch ($rep->f_order) {
 			case 'name'		: break;
-			case 'title'	: $options[order] = 'title'; break;
-			case 'author'	: $options[order] = 'author'; break;
-			case 'rating'	: $options[order] = 'rating-'; break;
-			case 'popular'	: $options[order] = 'popularity-'; break;
-			case 'reldate'	: $options[order] = 'releasedate-'; break;
-			default			: $options[order] = 'popularity-';
+			case 'title'	: $options['order'] = 'title'; break;
+			case 'author'	: $options['order'] = 'author'; break;
+			case 'rating'	: $options['order'] = 'rating-'; break;
+			case 'reldate'	: $options['order'] = 'releasedate-'; break;
+			default			: $options['order'] = 'popularity-';
 		} // switch
 		
 		// query extensions
@@ -154,7 +168,7 @@ class TensideCatalog extends Tenside
 
 		// add view links
 		$totrecs = 0;
-		// typolight compatibility check
+		// Contao compatibility check
 		$tlversion = Repository::encodeVersion(VERSION.'.'.BUILD);
 		foreach ($rep->extensions as &$ext) {
 			$ext->viewLink = $this->createUrl(array('view' => $ext->name.'.'.$ext->version.'.'.$ext->language));
@@ -162,22 +176,22 @@ class TensideCatalog extends Tenside
 			$displayversion = sprintf('%s - %s', Repository::formatCoreVersion($ext->coreminversion), Repository::formatCoreVersion($ext->coremaxversion));
 			if (($ext->coreminversion>0 && $tlversion<$ext->coreminversion) ||
 				($ext->coremaxversion>0 && $tlversion>$ext->coremaxversion) )
-			{	// less than current TL version
+			{	// less than current Core version
 				$ext->status = (object)array(
 					'color'	=> 'darkorange', 
 					'text'	=> 'notapproved', 
-					'par1'	=> 'TYPOlight',
+					'par1'	=> 'Contao',
 					'par2'	=> Repository::formatCoreVersion($tlversion)
 				);
 				$ext->validfor = (object)array(
 					'color'	=> 'red', 
 					'version' => $displayversion);
 			} else if($ext->coremaxversion>0 && $tlversion<$ext->coremaxversion)
-			{	// greater than current TL version
+			{	// greater than current Core version
 				$ext->validfor = (object)array(
 					'color'	=> 'blue', 
 					'version' => $displayversion);
-			} else	// equal to current TL version
+			} else	// equal to current Core version
 				$ext->validfor = (object)array(
 					'color'	=> 'green', 
 					'version' => $displayversion);

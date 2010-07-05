@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TYPOlight Repository :: Template to display a list of extensions
+ * Contao Repository :: Template to display a list of extensions
  *
  * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009 by CyberSpectrum 
  * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
@@ -26,22 +26,22 @@ $state_options = &$GLOBALS['TL_LANG']['tl_repository_state_options'];
 <input type="hidden" name="repository_action" value="<?php echo $rep->f_action; ?>" />
 
 <div class="tl_panel">
+
+<div class="tl_filter tl_subpanel">
 <?php echo $GLOBALS['TL_LANG']['tl_repository']['tag']; ?>&nbsp;<input type="text" name="repository_wildcardsearch" class="tl_select<?php if ($rep->f_wildcardsearch!='') echo ' active'; ?>" value="<?php echo $rep->f_wildcardsearch; ?>" /><input type="submit" value="->" />
-<select name="repository_tag" id="repository_tag" class="tl_select<?php if ($rep->f_tag!='') echo ' active'; ?>" onchange="this.form.submit()">
+<select name="repository_tag" id="repository_tag" class="tl_select<?php if ($rep->f_tag!='') echo ' active'; ?>">
   <option value=""><?php echo '-- '.$text['tag'].' --'; ?></option>
 <?php foreach ($rep->tags as $tag): ?>
   <option value="<?php echo $tag->item; ?>"<?php if ($rep->f_tag==$tag->item) echo ' selected="selected"'; ?>><?php echo $tag->item; ?></option>
 <?php endforeach; ?>
 </select>
- 
-<select name="repository_type" id="repository_type" class="tl_select<?php if ($rep->f_type!='') echo ' active'; ?>" onchange="this.form.submit()">
+<select name="repository_type" id="repository_type" class="tl_select<?php if ($rep->f_type!='') echo ' active'; ?>">
   <option value=""><?php echo '-- '.$text['type'][0].' --'; ?></option>
 <?php foreach (array_keys($type_options) as $tpe): ?>
   <option value="<?php echo $tpe; ?>"<?php if ($rep->f_type==$tpe) echo ' selected="selected"'; ?>><?php echo $type_options[$tpe]; ?></option>
 <?php endforeach; ?>
 </select>
-
-<select name="repository_category" id="repository_category" class="tl_select<?php if ($rep->f_category!='') echo ' active'; ?>" onchange="this.form.submit()">
+<select name="repository_category" id="repository_category" class="tl_select<?php if ($rep->f_category!='') echo ' active'; ?>">
   <option value=""><?php echo '-- '.$text['category'][0].' --'; ?></option>
 <?php foreach (array_keys($category_options) as $cat): ?>
 <?php if ($cat != 'core'): ?>
@@ -49,51 +49,55 @@ $state_options = &$GLOBALS['TL_LANG']['tl_repository_state_options'];
 <?php endif; ?>
 <?php endforeach; ?>
 </select>
-
-<select name="repository_state" id="repository_state" class="tl_select<?php if ($rep->f_state!='') echo ' active'; ?>" onchange="this.form.submit()">
+<select name="repository_state" id="repository_state" class="tl_select<?php if ($rep->f_state!='') echo ' active'; ?>">
   <option value=""><?php echo '-- '.$text['state'].' --'; ?></option>
 <?php foreach (array_keys($state_options) as $sta): ?>
   <option value="<?php echo $sta; ?>"<?php if ($rep->f_state==$sta) echo ' selected="selected"'; ?>><?php echo $state_options[$sta]; ?></option>
 <?php endforeach; ?>
 </select>
-
-<select name="repository_author" id="repository_author" class="tl_select<?php if ($rep->f_author!='') echo ' active'; ?>" onchange="this.form.submit()">
+<select name="repository_author" id="repository_author" class="tl_select<?php if ($rep->f_author!='') echo ' active'; ?>">
   <option value=""><?php echo '-- '.$text['author'].' --'; ?></option>
 <?php foreach ($rep->authors as $aut): ?>
   <option value="<?php echo $aut->item; ?>"<?php if ($rep->f_author==$aut->item) echo ' selected="selected"'; ?>><?php echo $aut->item; ?></option>
 <?php endforeach; ?>
 </select>
- 
 </div>
 
 <div class="clear"></div>
 
+</div>
 <div class="tl_panel">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<select name="repository_page" id="repository_page" class="tl_select<?php if ($rep->f_page!='' && $rep->f_page!=1) echo ' active'; ?>" onchange="this.form.submit()">
+
+<div class="tl_submit_panel tl_subpanel">
+<input type="image" name="filter" id="filter" src="system/themes/<?php echo $this->getTheme(); ?>/images/reload.gif" class="tl_img_submit" title="<?php echo $text['apply']; ?>" value="<?php echo $text['apply']; ?>" />
+</div>
+
+<div class="tl_limit tl_subpanel">
+<strong><?php echo $GLOBALS['TL_LANG']['MSC']['showOnly']; ?>:</strong>
+<select name="repository_page" id="repository_page" class="tl_select<?php if ($rep->f_page!='' && $rep->f_page!=1) echo ' active'; ?>">
 <?php for ($page = 1; $page <= $rep->pages; $page++): ?>
   <option value="<?php echo $page; ?>"<?php if ($rep->f_page==$page) echo ' selected="selected"'; ?>><?php echo sprintf($text['pageof'], $page, $rep->pages); ?></option>
 <?php endfor; ?>
 </select>
+</div>
 
-<select name="repository_order" id="repository_order" class="tl_select<?php if ($rep->f_order!='' && $rep->f_order!='popular') echo ' active'; ?>" onchange="this.form.submit()">
+<div class="tl_search tl_subpanel">
+<strong><?php echo $GLOBALS['TL_LANG']['MSC']['search']; ?>:</strong>
+<input type="text" name="repository_find" id="repository_find" value="<?php echo $rep->f_find; ?>" class="tl_text fulltextsearch<?php if ($rep->f_find!='') echo ' active'; ?>"/>
+</div>
+
+<div class="tl_sorting tl_subpanel">
+<strong><?php echo $GLOBALS['TL_LANG']['MSC']['sortBy']; ?>:</strong>
+<select name="repository_order" id="repository_order" class="tl_select">
 <?php foreach (array_keys($order_options) as $oby): ?>
   <option value="<?php echo $oby; ?>"<?php if ($rep->f_order==$oby) echo ' selected="selected"'; ?>><?php echo sprintf($text['byorder'], $order_options[$oby]); ?></option>
 <?php endforeach; ?>
 </select>
- 
-<input type="submit" name="repository_submit" id="repository_submit" class="tl_submit" alt="<?php echo $text['apply']; ?>" value="<?php echo $text['apply']; ?>" />
-
-<script type="text/javascript">
-<!--//--><![CDATA[//><!--
-document.getElementById('repository_submit').style.display = 'none';
-//--><!]]>
-</script>
-
 </div>
 
 <div class="clear"></div>
 
+</div>
 </div>
 </form>
 
@@ -117,40 +121,29 @@ document.getElementById('repository_submit').style.display = 'none';
   <th class="listcol1"><?php echo $text['version'][0]; ?></th>
   <td class="listcol2 status-<?php echo $ext->version % 10; ?>"><?php echo Repository::formatVersion($ext->version); ?></td>
   <th class="listcol3"><?php echo $text['type'][0]; ?></th>
-  <td class="type-<?php echo $ext->type; ?>"><?php echo $type_options[$ext->type]; ?></td>
-</tr>
-<tr class="info">
-  <th class="listcol1">TYPOlight</th>
-  <td class="listcol2 col_validfor"><?php echo '<div class="color_'.$ext->validfor->color.'">'.$ext->validfor->version.'</div>'."\n"; ?>
-<?php
-	echo '<div class="color_'.$ext->status->color.'">'.sprintf($statext[$ext->status->text], $ext->status->par1, $ext->status->par2).'</div>'."\n";
-?>
-<?php if ($ext->type=='commercial'): ?> 
-  <th><?php echo $text['demo'][0]; ?></th>
-  <td><?php echo $ext->demo ? $text['yes'] : $text['no']; ?></td>
-<?php else: ?>
-  <th><?php echo $text['license'][0]; ?></th>
-  <td><?php echo $ext->license; ?></td>
-<?php endif; ?>
-  </td>
+  <td class="type-<?php echo $ext->type; ?>"><?php echo $type_options[$ext->type]; ?> (<?php echo $ext->license; ?>)</td>
 </tr>
 <tr class="info">
   <th><?php echo $text['releasedate'][0]; ?></th>
   <td><?php echo $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $ext->releasedate); ?></td>
-  <th><?php echo $text['category'][0]; ?></th>
-  <td><?php echo $category_options[$ext->category]; ?></td>
+  <th class="listcol1">Contao</th>
+  <td class="listcol2 col_validfor"><?php echo '<div class="color_'.$ext->validfor->color.'">'.$ext->validfor->version.'</div>'."\n"; ?>
+<?php
+	echo '<div class="color_'.$ext->status->color.'">'.sprintf($statext[$ext->status->text], $ext->status->par1, $ext->status->par2).'</div>'."\n";
+?>
+  </td>
 </tr>
 <tr class="info">
   <th><?php echo $text['author']; ?></th>
   <td><?php echo $ext->author; ?></td>
-  <th><?php echo $text['popularity'][0]; ?></th>
-  <td class="nowrap"><?php echo sprintf($text['popularity'][1], (int)$ext->downloads, (int)$ext->installs); ?></td>
+  <th><?php echo $text['category'][0]; ?></th>
+  <td><?php echo $category_options[$ext->category]; ?></td>
 </tr>
 <tr class="info">
   <th><?php echo property_exists($ext, 'votes') ? $text['totrating'] : '&nbsp;'; ?></th>
   <td class="nowrap"><?php if (property_exists($ext, 'votes')): ?><div class="ratebarframe"><div class="ratebar" style="width:<?php echo $ext->rating*10.0; ?>%"></div></div> <div class="ratebartext"><?php echo sprintf($text['ratingfmt'], $ext->rating, $ext->votes); ?></div><?php endif; ?></td>
-  <th>&nbsp;</th>
-  <td class="nowrap">&nbsp;</td>
+  <th><?php echo $text['popularity'][0]; ?></th>
+  <td class="nowrap"><?php echo sprintf($text['popularity'][1], (int)$ext->downloads, (int)$ext->installs); ?></td>
 </tr>
 </table>
 <?php endforeach; ?>
@@ -158,8 +151,8 @@ document.getElementById('repository_submit').style.display = 'none';
 
 </div>
 </div>
+<?php if ($rep->pageOffset): ?>
 
-<?php if ($rep->pageOffset >= 0): ?>  
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 function repositoryGetScrollOffset()
@@ -168,6 +161,6 @@ function repositoryGetScrollOffset()
 	document.cookie = "REPOSITORY_PAGE_OFFSET=" + top + "; path=/";
 }
 onload = self.scrollTo(0, <?php echo $rep->pageOffset; ?>);
-<?php endif; ?>
 //--><!]]>
 </script>
+<?php endif; ?>

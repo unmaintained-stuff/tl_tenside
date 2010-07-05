@@ -1,6 +1,6 @@
 <?php
 /**
- * TYPOlight Repository :: Template to display list of installed extensions
+ * Contao Repository :: Template to display list of installed extensions
  *
  * @copyright	Copyright (C) 2008 by Peter Koch, IBK Software AG, 2009 by CyberSpectrum 
  * @author		Christian Schiffler <c.schiffler@cyberspectrum.de>
@@ -24,10 +24,17 @@
 
 <div class="mod_repository block">
 
+<form action="<?php echo $rep->f_link; ?>" id="repository_upgdform" method="post" >
 <div class="extension_container">
-<?php if (count($rep->extensions)>0) { ?>
+<input type="hidden" name="repository_action" value="<?php echo $rep->f_action; ?>" />
+<?php if (count($rep->extensions) < 1): ?>
+
+<p><?php echo $text['noextensionsfound']; ?></p>
+<?php else: ?>
+
 <table cellpadding="0" cellspacing="0" class="installs" summary="">
 <tr class="title">
+  <th class="col_selectcheckbox"><input type="checkbox" id="selectall" onclick="selectUnselectAll()" /></th>
   <th class="col_extension"><?php echo $text['extension'][0]; ?></th>
   <th class="col_version"><?php echo $text['version'][0]; ?></th>
   <th class="col_build"><?php echo $text['build']; ?></th>
@@ -36,9 +43,19 @@
   <th class="col_validfor"><?php echo $text['versionto']; ?></th>
   <th class="col_functions">&nbsp;</th>
 </tr>
-
-<?php foreach ($rep->extensions as $ext) { ?>
+<?php foreach ($rep->extensions as $ext): 
+	$icons = array($theme->createListButton('edit', $ext->editLink, $text['editextension']));
+	if (property_exists($ext, 'uninstallLink')) 
+		$icons[] = $theme->createListButton('uninstall', $ext->uninstallLink, $text['uninstallextension']);
+	if (property_exists($ext, 'manualLink')) 
+		$icons[] = $theme->createListButton('manual16', $ext->manualLink, $text['manual'], '', true);
+	if (property_exists($ext, 'forumLink')) 
+		$icons[] = $theme->createListButton('forum16', $ext->forumLink, $text['forum'], '', true);
+	if (property_exists($ext, 'updateLink')) 
+		$icons[] = $theme->createListButton('ok16', $ext->updateLink, $text['updateextension']);
+?>
 <tr class="datarow">
+  <td class="col_selectcheckbox"><?php if (property_exists($ext, 'updateLink')): ?><input type="checkbox" name="selectedids[]" value="<?php echo $ext->id; ?>" onclick="enableSelectFunctions()" /><?php else: ?>&nbsp;<?php endif; ?></td>
   <td class="col_extension"><?php echo property_exists($ext, 'catalogLink') ? '<a href="'.$ext->catalogLink.'">'.$ext->extension.'</a>' : $ext->extension; ?></td>
   <td class="col_version"><?php echo Repository::formatVersion($ext->version); ?></td>
   <td class="col_build"><?php echo $ext->build; ?></td>
@@ -50,31 +67,50 @@ if ((int)$ext->beta>0) echo $theme->createImage('beta16', $state_options['beta']
 if ((int)$ext->alpha>0) echo $theme->createImage('alpha16', $state_options['alpha'], 'title="'.$state_options['alpha'].'"'); 
 ?>
   </td>
-  <td class="col_status">
-<?php
-foreach ($ext->status as $sta) {
-	echo '<div class="color_'.$sta->color.'">'.sprintf($statext[$sta->text], $sta->par1, $sta->par2).'</div>'."\n";
-} // foreach status 
-?>
-  </td>
+  <td class="col_status"><?php foreach ($ext->status as $sta) echo '<div class="color_'.$sta->color.'">'.sprintf($statext[$sta->text], $sta->par1, $sta->par2).'</div>'; ?></td>
   <td class="col_validfor">
 <?php
 	echo '<div class="color_'.$ext->validfor->color.'">'.$ext->validfor->version.'</div>'."\n";
 ?>
   </td>
-  <td class="col_functions">
-  <?php echo $theme->createListButton('edit', $ext->editLink, $text['editextension']); ?> 
-  <?php echo $theme->createListButton('install16', $ext->updateLink, $text['updateextension']); ?>
-  <?php if (property_exists($ext, 'uninstallLink')) echo $theme->createListButton('uninstall', $ext->uninstallLink, $text['uninstallextension']); ?> 
-  <?php if (property_exists($ext, 'manualLink')) echo $theme->createListButton('manual16', $ext->manualLink, $text['manual'], '', true); ?> 
-  <?php if (property_exists($ext, 'forumLink')) echo $theme->createListButton('forum16', $ext->forumLink, $text['forum'], '', true); ?> 
-  </td>
+  <td class="col_functions"><?php echo implode(' ',$icons); ?></td>
 </tr>
-<?php } // foreach rep->extensions ?>
+<?php endforeach; ?>
 </table>
-<?php } else { ?>
-<p><?php echo $text['noextensionsfound']; ?></p>
-<?php } // if count rep->extensions ?>
+<?php endif; ?>
+</div>
+
+<div class="tl_formbody_submit">
+
+<div class="tl_submit_container">
+  <input type="submit" name="repository_upgradebutton" id="repository_upgradebutton" class="tl_submit" value="<?php echo $text['updateextensions']; ?>" />
 </div>
 
 </div>
+</form>
+</div>
+
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+function enableSelectFunctions() {
+  var sel = false;
+  var cbs = document.getElementsByName('selectedids[]');
+  for (var i = 0; i < cbs.length; ++i) { 
+    if (cbs[i].checked) {
+      sel = true;
+      break;
+    }
+  }
+  document.getElementById('repository_upgradebutton').disabled = !sel;
+}
+
+function selectUnselectAll() {
+  var chk = document.getElementById('selectall').checked;
+  var cbs = document.getElementsByName('selectedids[]');
+  for (var i = 0; i < cbs.length; ++i) cbs[i].checked = chk;
+  enableSelectFunctions();
+}
+
+enableSelectFunctions();
+//--><!]]>
+</script>
